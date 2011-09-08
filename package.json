@@ -11,6 +11,6 @@
   "keywords": ["twitter", "connect", "express", "middleware", "oauth"],
   "repository" : {
     "type" : "git",
-    "url"  : "http://github.com/isaacs/npm.git"
+    "url"  : "http://github.com/mahemoff/express-twitter"
   }
 }
