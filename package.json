@@ -1,0 +1,16 @@
+{
+  "name":"twitter",
+  "main": "twitter.coffee",
+  "version": "0.0.1",
+  "homepage": "http://github.com/mahemoff/express-twitter",
+  "dependencies": {
+    "oauth": "",
+    "express": "",
+    "winston": ""
+  },
+  "keywords": ["twitter", "connect", "express", "middleware", "oauth"],
+  "repository" : {
+    "type" : "git",
+    "url"  : "http://github.com/isaacs/npm.git"
+  }
+}

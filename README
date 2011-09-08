@@ -1,0 +1,32 @@
+An easy way to build Twitter apps with Node+Connect+Express.
+The library abstracts away the logic of connecting and disconnecting, building
+on the oauth library.
+
+It sets up /sessions/login and /sessions/logout paths, as well as a
+/sessions/debug path and, under the hood, some other paths.
+
+// MAKE SURE YOU INCLUDE COOKIE PARSER AND SESSION BEFORE THIS LIBRARY
+app.use(express.cookieParser());
+app.use(express.session({ secret:'randomness' }));
+app.use(twitter.middleware({
+  consumerKey: 'your-consumer-key',
+  consumerSecret: 'your-consumer-secret',
+  baseURL: 'http://your-app.com'
+}));
+
+app.get('/', function(req, res) {
+  if (req.session.twitter) res.send("hi " + req.session.twitter.name);
+  else res.send("<a href='log in'>/sessions/login</a>");
+});
+
+app.get('/you', function(req, res) {
+  twitter.get('http://twitter.com/account/verify_credentials.json', req,
+    function(err, data, response) {
+      res.send("Twitter says of you: "+sys.inspect(JSON.parse(data)));
+    });
+}
+
+Right now, you still have to construct the REST path to call.
+(https://dev.twitter.com/docs/api) The library may expand to support
+key high level abstractions, e.g. twitter.getTimeline(user);
+
