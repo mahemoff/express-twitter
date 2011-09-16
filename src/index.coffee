@@ -1,6 +1,6 @@
-'express,oauth,sys,winston'
-  # .split(',').forEach (lib) -> eval "console.log('#{lib}');"
-  .split(',').forEach (lib) -> eval "#{lib} = require('#{lib}')"
+oauth = require 'oauth'
+sys = require 'sys'
+winston = require 'winston'
 
 T =
 
@@ -33,13 +33,11 @@ T =
           T.sendError req, res, "Error getting OAuth access token : #{sys.inspect(err)}" +
             "[#{oauthAccessToken}] [#{oauthAccessTokenSecret}] [#{sys.inspect(results)}]" 
 
-        console.log "results", results, typeof(results)
         req.session.twitter =
           accessToken: oauthAccessToken
           accessTokenSecret: oauthAccessTokenSecret
           name: results.screen_name
         res.redirect T.options.afterLogin
-        console.log "Redirected to #{T.options.afterLogin}"
 
   ##############################################################################
   # UTILS/HELPERS
@@ -91,19 +89,63 @@ T =
       else if req.url.match(/^\/sessions\/callback/) then action=T.callback
       if action then action req,res else next()
 
-  get: (apiPath, req, callback) ->
+  get: (url, req, callback) ->
     callback 'no twitter session' unless req.session.twitter?
-    T.consumer.get apiPath, req.session.twitter.accessToken, req.session.twitter.accessTokenSecret,
+    T.consumer.get url, req.session.twitter.accessToken, req.session.twitter.accessTokenSecret,
     (err, data, response) ->
       callback err, data, response
 
-  post: (apiPath, req, body, callback) ->
+  getJSON: (apiPath, req, callback) ->
     callback 'no twitter session' unless req.session.twitter?
-    T.consumer.post apiPath, req.session.twitter.accessToken, req.session.twitter.accessTokenSecret, content
+    T.consumer.get "http://api.twitter.com/1#{apiPath}", req.session.twitter.accessToken, req.session.twitter.accessTokenSecret,
+    (err, data, response) ->
+      callback err, JSON.parse(data), response
+
+  post: (url, body, req, callback) ->
+    callback 'no twitter session' unless req.session.twitter?
+    T.consumer.post url, req.session.twitter.accessToken, req.session.twitter.accessTokenSecret, body,
     (err, data, response) ->
       callback err, data, response
+
+  postJSON: (apiPath, body, req, callback) ->
+    callback 'no twitter session' unless req.session.twitter?
+    url = "http://api.twitter.com/1#{apiPath}"
+    T.consumer.post url, req.session.twitter.accessToken, req.session.twitter.accessTokenSecret, body,
+    (err, data, response) ->
+      callback err, JSON.parse(data), response
+
+  ##############################################################################
+  # SPECIFIC CALLS (could be extracted elsewhere)
+  ##############################################################################
+
+  getSelf: (req, callback) ->
+    T.get 'http://twitter.com/account/verify_credentials.json', req, (err, data, response) ->
+      callback err, JSON.parse(data), response
+
+  getFollowerIDs: (name, req, callback) ->
+    T.getJSON "/followers/ids.json?screen_name=#{name}&stringify_ids=true", req, (err, data, response) ->
+      callback err, data, response
+
+  getFriendIDs: (name, req, callback) ->
+    T.getJSON "/friends/ids.json?screen_name=#{name}&stringify_ids=true", req, (err, data, response) ->
+      callback err, data, response
+
+  getUsers: (ids, req, callback) ->
+    T.getJSON "/users/lookup.json?include_entities=false&user_id=#{ids.join(',')}", req, (err, data, response) ->
+      callback err, data, response
   
-module.exports =
-  middleware: T.middleware
-  get: T.get
-  post: T.post
+  follow: (id, req, callback) ->
+    T.postJSON "/friendships/create/#{id}.json", "", req, (err, data, response) ->
+      callback err, data, response
+
+  unfollow: (id, req, callback) ->
+    T.postJSON "/friendships/destroy/#{id}.json", "", req, (err, data, response) ->
+      callback err, data, response
+
+  status: (status, req, callback) ->
+    T.postJSON "/statuses/update.json?status=#{status}", '', req, (err, data, response) ->
+      callback err
+
+module.exports = {}
+libs = "middleware,login,logout,get,getJSON,post,postJSON,getSelf,getUsers,getFriendIDs,getFollowerIDs,follow,unfollow,status"
+module.exports[lib] = T[lib] for lib in libs.split(',')

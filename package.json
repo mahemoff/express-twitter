@@ -1,5 +1,5 @@
 {
-  "name":"twitter",
+  "name":"express-twitter",
   "main": "twitter.coffee",
   "version": "0.0.1",
   "homepage": "http://github.com/mahemoff/express-twitter",
