@@ -24,7 +24,7 @@ app.get('/you', function(req, res) {
     function(err, data, response) {
       res.send("Twitter says of you: "+sys.inspect(JSON.parse(data)));
     });
-}
+});
 
 Right now, you still have to construct the REST path to call.
 (https://dev.twitter.com/docs/api) The library may expand to support
