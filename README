@@ -16,7 +16,7 @@ app.use(twitter.middleware({
 
 app.get('/', function(req, res) {
   if (req.session.twitter) res.send("hi " + req.session.twitter.name);
-  else res.send("<a href='log in'>/sessions/login</a>");
+  else res.send("<a href='/sessions/login'>log in</a>");
 });
 
 app.get('/you', function(req, res) {
