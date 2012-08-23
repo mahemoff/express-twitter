@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/mahemoff/express-twitter.png)](http://travis-ci.org/mahemoff/express-twitter)
 An easy way to build Twitter apps with Node+Connect+Express.
 The library abstracts away the logic of connecting and disconnecting, building
 on the oauth library.
